@@ -22,11 +22,11 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 26
       - run: bun install --frozen-lockfile
@@ -64,15 +64,15 @@ jobs:
             asset: linux-arm64
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --libc='*'
       - run: bun run build:binary
       - run: test "$(build/dokploy-infisical --version)" = "${{ needs.verify.outputs.version }}"
       - run: tar -C build -czf "dokploy-infisical-${{ matrix.asset }}.tar.gz" dokploy-infisical
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dokploy-infisical-${{ matrix.asset }}
           path: dokploy-infisical-${{ matrix.asset }}.tar.gz
@@ -86,11 +86,11 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 26
           registry-url: https://registry.npmjs.org
@@ -104,8 +104,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: dokploy-infisical-*
           path: release
@@ -122,13 +122,13 @@ jobs:
     runs-on: macos-15
     environment: release
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: dokploy-infisical-*
           path: release
           merge-multiple: true
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: sadrozzy/homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
