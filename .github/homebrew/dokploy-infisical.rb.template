@@ -1,0 +1,34 @@
+class DokployInfisical < Formula
+  desc "TUI for bidirectional Dokploy and Infisical secret sync"
+  homepage "https://github.com/sadrozzy/dokploy-infisical"
+  version "@@VERSION@@"
+  license "MIT"
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/sadrozzy/dokploy-infisical/releases/download/v@@VERSION@@/dokploy-infisical-darwin-arm64.tar.gz"
+      sha256 "@@DARWIN_ARM64_SHA256@@"
+    else
+      url "https://github.com/sadrozzy/dokploy-infisical/releases/download/v@@VERSION@@/dokploy-infisical-darwin-x64.tar.gz"
+      sha256 "@@DARWIN_X64_SHA256@@"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.arm?
+      url "https://github.com/sadrozzy/dokploy-infisical/releases/download/v@@VERSION@@/dokploy-infisical-linux-arm64.tar.gz"
+      sha256 "@@LINUX_ARM64_SHA256@@"
+    else
+      url "https://github.com/sadrozzy/dokploy-infisical/releases/download/v@@VERSION@@/dokploy-infisical-linux-x64.tar.gz"
+      sha256 "@@LINUX_X64_SHA256@@"
+    end
+  end
+
+  def install
+    bin.install "dokploy-infisical"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/dokploy-infisical --version")
+  end
+end

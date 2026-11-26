@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1030" height="697" viewBox="0 0 1030 697" role="img" aria-label="Workflow selection TUI">
+  <rect width="100%" height="100%" rx="14" fill="#080c12"/>
+  <circle cx="22" cy="22" r="6" fill="#ff5f57"/><circle cx="42" cy="22" r="6" fill="#febc2e"/><circle cx="62" cy="22" r="6" fill="#28c840"/>
+  <text x="50%" y="27" text-anchor="middle" class="title">dokploy-infisical</text>
+  <style>
+    .title { fill: #7f8da3; font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .row { fill: #d8e1ee; font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  </style>
+  <text x="20" y="58" class="row">                                                                                                              </text>
+  <text x="20" y="77" class="row"> DOKPLOY × INFISICAL                                                                             selected 0/4 </text>
+  <text x="20" y="96" class="row">                                                                                                              </text>
+  <text x="20" y="115" class="row"> Interactive secrets migration · encrypted rollback                                                           </text>
+  <text x="20" y="134" class="row">                                                                                                              </text>
+  <text x="20" y="153" class="row"> ● Dokploy v0.31.4 · https://dokploy.example.com                                                              </text>
+  <text x="20" y="172" class="row">                                                                                                              </text>
+  <text x="20" y="191" class="row"> ╭─ Choose workflow ────────────────────────────────────────────────────────────────────────────────────────╮ </text>
+  <text x="20" y="210" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="229" class="row"> │  › Dokploy → Infisical                                                                                   │ </text>
+  <text x="20" y="248" class="row"> │    Move raw values to /project/_shared and /project/service, then attach Vault refs                      │ </text>
+  <text x="20" y="267" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="286" class="row"> │    Infisical → Dokploy                                                                                   │ </text>
+  <text x="20" y="305" class="row"> │    Attach missing Vault refs from the existing folder hierarchy; no plaintext import                     │ </text>
+  <text x="20" y="324" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="343" class="row"> │    Rollback                                                                                              │ </text>
+  <text x="20" y="362" class="row"> │    Browse encrypted migration snapshots by project and restore one                                       │ </text>
+  <text x="20" y="381" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="400" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="419" class="row"> │ ──────────────────────────────────────────────────────────────────────────────────────────────────────── │ </text>
+  <text x="20" y="438" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="457" class="row"> │ ● Synced  ● Outdated  ● Not synced                                                                       │ </text>
+  <text x="20" y="476" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="495" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="514" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="533" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="552" class="row"> ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯ </text>
+  <text x="20" y="571" class="row">                                                                                                              </text>
+  <text x="20" y="590" class="row"> ──────────────────────────────────────────────────────────────────────────────────────────────────────────── </text>
+  <text x="20" y="609" class="row">                                                                                                              </text>
+  <text x="20" y="628" class="row"> ↑↓ choose mode   enter open   q quit                                                                         </text>
+  <text x="20" y="647" class="row">                                                                                                              </text>
+  <text x="20" y="666" class="row"> </text>
+</svg>

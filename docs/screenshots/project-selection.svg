@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1030" height="697" viewBox="0 0 1030 697" role="img" aria-label="Project and service selection TUI">
+  <rect width="100%" height="100%" rx="14" fill="#080c12"/>
+  <circle cx="22" cy="22" r="6" fill="#ff5f57"/><circle cx="42" cy="22" r="6" fill="#febc2e"/><circle cx="62" cy="22" r="6" fill="#28c840"/>
+  <text x="50%" y="27" text-anchor="middle" class="title">dokploy-infisical</text>
+  <style>
+    .title { fill: #7f8da3; font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .row { fill: #d8e1ee; font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  </style>
+  <text x="20" y="58" class="row">                                                                                                              </text>
+  <text x="20" y="77" class="row"> DOKPLOY × INFISICAL                                                                             selected 1/4 </text>
+  <text x="20" y="96" class="row">                                                                                                              </text>
+  <text x="20" y="115" class="row"> Interactive secrets migration · encrypted rollback                                                           </text>
+  <text x="20" y="134" class="row">                                                                                                              </text>
+  <text x="20" y="153" class="row"> ● Dokploy v0.31.4 · https://dokploy.example.com                                                              </text>
+  <text x="20" y="172" class="row">                                                                                                              </text>
+  <text x="20" y="191" class="row"> ╭─ Projects &amp; services · 1-5 of 5 ─────────────────────────────────────────────────────────────────────────╮ </text>
+  <text x="20" y="210" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="229" class="row"> │    ▾ ◈ Commerce                                                                ● Not synced  3 services  │ </text>
+  <text x="20" y="248" class="row"> │  ›    ◆ API                                                                    production · application  │ </text>
+  <text x="20" y="267" class="row"> │       ◇ Worker                                                                 production · application  │ </text>
+  <text x="20" y="286" class="row"> │       ◇ Monitoring                                                                 production · compose  │ </text>
+  <text x="20" y="305" class="row"> │    ▸ ◇ Website                                                                 ● Not synced  1 services  │ </text>
+  <text x="20" y="324" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="343" class="row"> │ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────╮ │ </text>
+  <text x="20" y="362" class="row"> │ │ Continue with 1 projects (1 services)  →                                                             │ │ </text>
+  <text x="20" y="381" class="row"> │ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯ │ </text>
+  <text x="20" y="400" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="419" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="438" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="457" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="476" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="495" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="514" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="533" class="row"> │                                                                                                          │ </text>
+  <text x="20" y="552" class="row"> ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────╯ </text>
+  <text x="20" y="571" class="row">                                                                                                              </text>
+  <text x="20" y="590" class="row"> ──────────────────────────────────────────────────────────────────────────────────────────────────────────── </text>
+  <text x="20" y="609" class="row">                                                                                                              </text>
+  <text x="20" y="628" class="row"> ↑↓ move   ←→ collapse/expand   space/enter select   tab Continue   m review   esc modes                      </text>
+  <text x="20" y="647" class="row">                                                                                                              </text>
+  <text x="20" y="666" class="row"> </text>
+</svg>

@@ -1,0 +1,56 @@
+{
+  "name": "dokploy-infisical",
+  "version": "0.1.0",
+  "description": "Modern TUI for bidirectional Dokploy and Infisical secret sync",
+  "module": "./dist/cli.js",
+  "type": "module",
+  "license": "MIT",
+  "author": "sadrozzy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sadrozzy/dokploy-infisical.git"
+  },
+  "homepage": "https://github.com/sadrozzy/dokploy-infisical#readme",
+  "bugs": {
+    "url": "https://github.com/sadrozzy/dokploy-infisical/issues"
+  },
+  "bin": {
+    "dokploy-infisical": "./bin/dokploy-infisical"
+  },
+  "files": ["bin", "dist", "docs/screenshots", "README.md", "README.ru.md", "LICENSE"],
+  "keywords": ["dokploy", "infisical", "secrets", "migration", "tui", "bun", "cli"],
+  "os": ["darwin", "linux"],
+  "scripts": {
+    "dev": "bun run --watch src/cli.tsx",
+    "start": "bun run src/cli.tsx",
+    "build": "bun build src/cli.tsx --outdir dist --target node --packages external",
+    "build:binary": "bun build src/cli.tsx --compile --minify --outfile build/dokploy-infisical",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "check": "bun run typecheck && bun test",
+    "test:runtimes": "bun run build && bun scripts/test-runtimes.ts",
+    "test:install": "bash scripts/test-installation.sh",
+    "screenshots": "bun scripts/capture-screenshots.tsx",
+    "pack:dry": "npm pack --dry-run",
+    "prepack": "bun run build",
+    "prepublishOnly": "bun run check && bun run test:runtimes"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/react": "^19.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.9.9",
+    "@opentui/react": "^0.9.9",
+    "react": "^19.3.1"
+  },
+  "engines": {
+    "bun": ">=1.3.14",
+    "node": ">=26.4.0"
+  },
+  "packageManager": "bun@1.4.5"
+}

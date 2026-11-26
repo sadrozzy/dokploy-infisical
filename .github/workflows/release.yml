@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version from package.json, without the v prefix
+        required: true
+        type: string
+      confirmation:
+        description: Type PUBLISH to release to GitHub, npm and Homebrew
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: inputs.confirmation == 'PUBLISH'
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run test:runtimes
+      - id: version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          package_version=$(node -p "require('./package.json').version")
+          test "$package_version" = "$REQUESTED_VERSION"
+          echo "version=$package_version" >> "$GITHUB_OUTPUT"
+      - env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git fetch --tags --force
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists" >&2
+            exit 1
+          fi
+
+  build:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            asset: darwin-arm64
+          - runner: macos-15-intel
+            asset: darwin-x64
+          - runner: ubuntu-24.04
+            asset: linux-x64
+          - runner: ubuntu-24.04-arm
+            asset: linux-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
+      - run: bun install --frozen-lockfile
+      - run: bun run build:binary
+      - run: test "$(build/dokploy-infisical --version)" = "${{ needs.verify.outputs.version }}"
+      - run: tar -C build -czf "dokploy-infisical-${{ matrix.asset }}.tar.gz" dokploy-infisical
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dokploy-infisical-${{ matrix.asset }}
+          path: dokploy-infisical-${{ matrix.asset }}.tar.gz
+          if-no-files-found: error
+
+  npm:
+    needs: [verify, build]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - run: npm publish --access public --provenance
+
+  github-release:
+    needs: [verify, build]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dokploy-infisical-*
+          path: release
+          merge-multiple: true
+      - working-directory: release
+        run: sha256sum *.tar.gz > SHA256SUMS
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: gh release create "v$VERSION" release/* --target "$GITHUB_SHA" --generate-notes --title "v$VERSION"
+
+  homebrew:
+    needs: [verify, build, github-release]
+    runs-on: macos-15
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dokploy-infisical-*
+          path: release
+          merge-multiple: true
+      - uses: actions/checkout@v4
+        with:
+          repository: sadrozzy/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+      - env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          mkdir -p homebrew-tap/Formula
+          bash scripts/render-homebrew-formula.sh "$VERSION" release homebrew-tap/Formula/dokploy-infisical.rb
+          ruby -c homebrew-tap/Formula/dokploy-infisical.rb
+      - run: |
+          brew install --formula homebrew-tap/Formula/dokploy-infisical.rb
+          brew test dokploy-infisical
+          brew uninstall dokploy-infisical
+      - working-directory: homebrew-tap
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add Formula/dokploy-infisical.rb
+          git commit -m "dokploy-infisical $VERSION"
+          git push
