@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
+      release_ref: ${{ steps.release-ref.outputs.ref }}
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -39,13 +40,16 @@ jobs:
           package_version=$(node -p "require('./package.json').version")
           test "$package_version" = "$REQUESTED_VERSION"
           echo "version=$package_version" >> "$GITHUB_OUTPUT"
-      - env:
+      - id: release-ref
+        env:
           VERSION: ${{ inputs.version }}
         run: |
           git fetch --tags --force
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists" >&2
-            exit 1
+          if git rev-parse --verify "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "ref=refs/tags/v$VERSION" >> "$GITHUB_OUTPUT"
+            echo "Reusing existing tag v$VERSION"
+          else
+            echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
           fi
 
   build:
@@ -65,6 +69,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_ref }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
@@ -87,6 +93,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_ref }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
@@ -95,7 +103,14 @@ jobs:
           node-version: 26
           registry-url: https://registry.npmjs.org
       - run: bun install --frozen-lockfile
-      - run: npm publish --access public --provenance
+      - env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if npm view "dokploy-infisical@$VERSION" version >/dev/null 2>&1; then
+            echo "dokploy-infisical@$VERSION is already published; skipping"
+          else
+            npm publish --access public --provenance
+          fi
 
   github-release:
     needs: [verify, build]
@@ -105,6 +120,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_ref }}
       - uses: actions/download-artifact@v8
         with:
           pattern: dokploy-infisical-*
@@ -115,7 +132,12 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.verify.outputs.version }}
-        run: gh release create "v$VERSION" release/* --target "$GITHUB_SHA" --generate-notes --title "v$VERSION"
+        run: |
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release upload "v$VERSION" release/* --clobber
+          else
+            gh release create "v$VERSION" release/* --target "$GITHUB_SHA" --generate-notes --title "v$VERSION"
+          fi
 
   homebrew:
     needs: [verify, build, github-release]
@@ -123,6 +145,8 @@ jobs:
     environment: release
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_ref }}
       - uses: actions/download-artifact@v8
         with:
           pattern: dokploy-infisical-*
@@ -139,10 +163,6 @@ jobs:
           mkdir -p homebrew-tap/Formula
           bash scripts/render-homebrew-formula.sh "$VERSION" release homebrew-tap/Formula/dokploy-infisical.rb
           ruby -c homebrew-tap/Formula/dokploy-infisical.rb
-      - run: |
-          brew install --formula homebrew-tap/Formula/dokploy-infisical.rb
-          brew test dokploy-infisical
-          brew uninstall dokploy-infisical
       - working-directory: homebrew-tap
         env:
           VERSION: ${{ needs.verify.outputs.version }}
@@ -150,5 +170,19 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add Formula/dokploy-infisical.rb
-          git commit -m "dokploy-infisical $VERSION"
-          git push
+          if git diff --cached --quiet; then
+            echo "Homebrew formula is already up to date"
+          else
+            git commit -m "dokploy-infisical $VERSION"
+          fi
+      - run: |
+          brew tap sadrozzy/tap "$GITHUB_WORKSPACE/homebrew-tap"
+          brew install sadrozzy/tap/dokploy-infisical
+          brew test sadrozzy/tap/dokploy-infisical
+          brew uninstall dokploy-infisical
+      - if: always()
+        run: |
+          brew uninstall dokploy-infisical 2>/dev/null || true
+          brew untap sadrozzy/tap 2>/dev/null || true
+      - working-directory: homebrew-tap
+        run: git push

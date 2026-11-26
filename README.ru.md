@@ -10,8 +10,6 @@
 
 > Проект сообщества, не связанный официально с Dokploy или Infisical.
 
-> Первый публичный релиз ещё не выполнен. Команды ниже настроены и проверяются локально и в CI, но npm-пакет и Homebrew-формула станут доступны только после ручного подтверждения и запуска релизного workflow.
-
 ## TUI
 
 Скриншоты создаются из настоящих OpenTUI-компонентов командой `bun run screenshots`; секреты и производственные данные не используются.
@@ -38,7 +36,7 @@
 Нужен Node.js 26.4 или новее.
 
 ```bash
-npm install --global dokploy-infisical
+npm install -g dokploy-infisical
 ```
 
 ### pnpm
@@ -46,7 +44,7 @@ npm install --global dokploy-infisical
 Нужен Node.js 26.4 или новее.
 
 ```bash
-pnpm add --global dokploy-infisical
+pnpm add -g dokploy-infisical
 ```
 
 ### Bun
@@ -54,7 +52,7 @@ pnpm add --global dokploy-infisical
 Нужен Bun 1.3.14 или новее.
 
 ```bash
-bun add --global dokploy-infisical
+bun add -g dokploy-infisical
 ```
 
 ### Homebrew
@@ -64,6 +62,8 @@ bun add --global dokploy-infisical
 ```bash
 brew install sadrozzy/tap/dokploy-infisical
 ```
+
+Полное имя Formula явно разрешает установку только этого пакета. Пользователю не нужно выполнять `brew trust` или доверять всему tap.
 
 Поддерживаются macOS и Linux на arm64 и x64.
 
@@ -152,10 +152,10 @@ dokploy-infisical rollback <migration-id>
 
 | Менеджер | Обновление | Удаление |
 | --- | --- | --- |
-| npm | `npm update --global dokploy-infisical` | `npm uninstall --global dokploy-infisical` |
-| pnpm | `pnpm update --global dokploy-infisical` | `pnpm remove --global dokploy-infisical` |
-| Bun | `bun update --global dokploy-infisical` | `bun remove --global dokploy-infisical` |
-| Homebrew | `brew upgrade dokploy-infisical` | `brew uninstall dokploy-infisical` |
+| npm | `npm update -g dokploy-infisical` | `npm uninstall -g dokploy-infisical` |
+| pnpm | `pnpm update -g dokploy-infisical` | `pnpm remove -g dokploy-infisical` |
+| Bun | `bun update -g dokploy-infisical` | `bun remove -g dokploy-infisical` |
+| Homebrew | `brew upgrade sadrozzy/tap/dokploy-infisical` | `brew uninstall dokploy-infisical` |
 
 Удаление программы не удаляет конфигурацию, записи Keychain и зашифрованные снимки.
 

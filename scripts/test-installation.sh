@@ -13,7 +13,7 @@ version=$(node -p "require('./package.json').version")
 
 test_npm() {
   prefix=$work_dir/npm
-  npm install --global --prefix "$prefix" "$tarball"
+  npm install -g --prefix "$prefix" "$tarball"
   test "$("$prefix/bin/dokploy-infisical" --version)" = "$version"
   printf '%s\n' "ok npm: $version"
 }
@@ -28,7 +28,7 @@ test_pnpm() {
   fi
   mkdir -p "$pnpm_bin"
   export PATH=$pnpm_bin:$PATH
-  pnpm add --global "$tarball"
+  pnpm add -g "$tarball"
   test "$("$pnpm_bin/dokploy-infisical" --version)" = "$version"
   printf '%s\n' "ok pnpm: $version"
 }
@@ -36,7 +36,7 @@ test_pnpm() {
 test_bun() {
   export BUN_INSTALL=$work_dir/bun
   mkdir -p "$BUN_INSTALL/bin"
-  bun add --global "$tarball"
+  bun add -g "$tarball"
   test "$("$BUN_INSTALL/bin/dokploy-infisical" --version)" = "$version"
   printf '%s\n' "ok bun: $version"
 }

@@ -10,8 +10,6 @@ A terminal UI for safely syncing Dokploy environment secrets with Infisical. It 
 
 > Community project. Not affiliated with Dokploy or Infisical.
 
-> The repository has not had its first public release yet. The commands below are configured and tested locally/through CI, but the npm package and Homebrew formula only become available after the manual release workflow is approved and run.
-
 ## TUI
 
 These screenshots are generated from the real OpenTUI components by `bun run screenshots`; no secrets or production data are used.
@@ -38,7 +36,7 @@ Every installation method provides the same command: `dokploy-infisical`.
 Requires Node.js 26.4 or newer.
 
 ```bash
-npm install --global dokploy-infisical
+npm install -g dokploy-infisical
 ```
 
 ### pnpm
@@ -46,7 +44,7 @@ npm install --global dokploy-infisical
 Requires Node.js 26.4 or newer.
 
 ```bash
-pnpm add --global dokploy-infisical
+pnpm add -g dokploy-infisical
 ```
 
 ### Bun
@@ -54,7 +52,7 @@ pnpm add --global dokploy-infisical
 Requires Bun 1.3.14 or newer.
 
 ```bash
-bun add --global dokploy-infisical
+bun add -g dokploy-infisical
 ```
 
 ### Homebrew
@@ -64,6 +62,8 @@ The Homebrew package contains a standalone binary and does not require Node.js o
 ```bash
 brew install sadrozzy/tap/dokploy-infisical
 ```
+
+Using the fully qualified formula name explicitly authorizes this formula. Users do not need to run `brew trust` or trust the entire tap.
 
 Supported platforms are macOS and Linux on arm64 and x64.
 
@@ -152,10 +152,10 @@ dokploy-infisical rollback <migration-id>
 
 | Manager | Update | Uninstall |
 | --- | --- | --- |
-| npm | `npm update --global dokploy-infisical` | `npm uninstall --global dokploy-infisical` |
-| pnpm | `pnpm update --global dokploy-infisical` | `pnpm remove --global dokploy-infisical` |
-| Bun | `bun update --global dokploy-infisical` | `bun remove --global dokploy-infisical` |
-| Homebrew | `brew upgrade dokploy-infisical` | `brew uninstall dokploy-infisical` |
+| npm | `npm update -g dokploy-infisical` | `npm uninstall -g dokploy-infisical` |
+| pnpm | `pnpm update -g dokploy-infisical` | `pnpm remove -g dokploy-infisical` |
+| Bun | `bun update -g dokploy-infisical` | `bun remove -g dokploy-infisical` |
+| Homebrew | `brew upgrade sadrozzy/tap/dokploy-infisical` | `brew uninstall dokploy-infisical` |
 
 Uninstalling does not delete configuration, Keychain entries, or encrypted snapshots.
 
