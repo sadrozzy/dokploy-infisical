@@ -1,87 +1,116 @@
-# dokploy-infisical
+<div align="center">
+  <img src="docs/assets/readme-hero.svg" alt="dokploy-infisical — safe secret migration between Dokploy and Infisical" width="100%">
 
-[![CI](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml/badge.svg)](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/dokploy-infisical.svg)](https://www.npmjs.com/package/dokploy-infisical)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  <br>
 
-**English** · [Русский](README.ru.md)
+  [![CI](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml/badge.svg)](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml)
+  [![npm](https://img.shields.io/npm/v/dokploy-infisical.svg)](https://www.npmjs.com/package/dokploy-infisical)
+  [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e.svg)](LICENSE)
 
-A terminal UI for safely syncing Dokploy environment secrets with Infisical. It builds a reviewable plan, encrypts a rollback snapshot before the first write, verifies both systems after the migration, and never prints secret values.
+  **English** · [Русский](README.ru.md)
+</div>
 
-> Community project. Not affiliated with Dokploy or Infisical.
+## What it does
 
-## TUI
+`dokploy-infisical` is a terminal app that moves application secrets from Dokploy to Infisical, then reconnects them through Dokploy Vault references.
 
-These screenshots are generated from the real OpenTUI components by `bun run screenshots`; no secrets or production data are used.
+Instead of copying values between two dashboards, you select projects, review a complete plan, and confirm the migration. Before the first change, the app creates an encrypted rollback snapshot. Afterward, it reads both systems again to verify the result.
 
-![Workflow selection](docs/screenshots/workflows.svg)
+> Community project. Not officially affiliated with Dokploy or Infisical.
 
-![Project and service selection](docs/screenshots/project-selection.svg)
+### Use it when
 
-## Features
+- secrets currently live directly in Dokploy environment variables;
+- Infisical is already configured as a Dokploy Vault provider;
+- several projects need to move without repetitive manual work;
+- you need to review every change and keep a clear recovery path.
 
-- **Dokploy → Infisical** — copy raw values to `/<project>/_shared` or `/<project>/<service>`, then replace service values with Vault references.
-- **Infisical → Dokploy** — attach missing Vault references without copying plaintext back to Dokploy.
-- **Encrypted rollback** — AES-256-GCM snapshots, automatic rollback after a failed write, and manual restoration from the TUI or CLI.
-- **Dry review and verification** — inspect the exact number of secrets and rewrites before applying them, then read both systems back.
-- **Safe repeats** — existing `${{vault.*}}` references are immutable and never become secret plaintext.
-- **Explicit redeploy** — redeploy is a separate confirmation after a verified migration; it is never automatic.
+## How it works
 
-## Install
+<p align="center">
+  <img src="docs/assets/migration-flow.svg" alt="Migration flow from Dokploy through plan review and encrypted snapshot to Infisical and Vault references" width="100%">
+</p>
 
-Every installation method provides the same command: `dokploy-infisical`.
+Two safe workflows are available:
 
-### npm
+- **Dokploy → Infisical** — move raw values to `/<project>/_shared` or `/<project>/<service>`, then replace them in Dokploy with Vault references.
+- **Infisical → Dokploy** — attach missing Vault references from the existing folder structure. Plaintext values are never copied back from Infisical.
 
-Requires Node.js 26.4 or newer.
+## Quick start
 
-```bash
-npm install -g dokploy-infisical
-```
+### 1. Install
 
-### pnpm
-
-Requires Node.js 26.4 or newer.
-
-```bash
-pnpm add -g dokploy-infisical
-```
-
-### Bun
-
-Requires Bun 1.3.14 or newer.
-
-```bash
-bun add -g dokploy-infisical
-```
-
-### Homebrew
-
-The Homebrew package contains a standalone binary and does not require Node.js or Bun.
+**Homebrew** provides a standalone binary; Node.js and Bun are not required:
 
 ```bash
 brew install sadrozzy/tap/dokploy-infisical
 ```
 
-Using the fully qualified formula name explicitly authorizes this formula. Users do not need to run `brew trust` or trust the entire tap.
+Or install from the npm registry:
 
-Supported platforms are macOS and Linux on arm64 and x64.
+```bash
+npm install -g dokploy-infisical
+```
 
-## Quick start
+npm and pnpm require Node.js 26.4+. Bun installs require Bun 1.3.14+.
+
+<details>
+<summary>Other install commands</summary>
+
+```bash
+pnpm add -g dokploy-infisical
+# or
+bun add -g dokploy-infisical
+```
+
+</details>
+
+macOS and Linux are supported on arm64 and x64.
+
+### 2. Prepare access
+
+You will need:
+
+- a Dokploy URL and API token;
+- an Infisical URL;
+- Client ID and Client Secret for an Infisical Machine Identity using Universal Auth;
+- an Infisical project ID and environment slug;
+- the name of an existing Dokploy Vault provider.
+
+The Vault provider must already be assigned to the projects and environments you plan to migrate.
+
+### 3. Run
 
 ```bash
 dokploy-infisical
 ```
 
-The first-run wizard asks for:
+On the first run, the wizard collects credentials, checks connections, and loads your projects. Then choose a workflow → select projects or services → review the plan → confirm the migration.
 
-- Dokploy URL and API token;
-- Infisical URL;
-- Universal Auth Client ID and Client Secret;
-- Infisical project ID and environment slug;
-- the existing Dokploy Vault provider name.
+![Project and service selection](docs/screenshots/project-selection.svg)
 
-Non-secret settings are stored in `~/.config/dokploy-infisical/config.json`. On macOS, credentials are stored in Keychain. On Linux, supply credentials through the environment:
+## Migration safeguards
+
+| Safeguard | What it provides |
+| --- | --- |
+| Plan before writes | Shows secret, rewrite, conflict, and warning counts before applying anything |
+| Encrypted snapshot | Created before the first change and protected with AES-256-GCM |
+| Automatic rollback | Starts if a write fails |
+| Read-back verification | Reads both systems again after the migration |
+| Safe repeat runs | Existing `${{vault.*}}` values stay unchanged and never become plaintext |
+| Separate redeploy | Never runs automatically and always requires confirmation |
+
+The app never prints secret values to the terminal. Recovery passwords are never stored.
+
+## Configuration and credentials
+
+Non-secret settings are stored in:
+
+```text
+~/.config/dokploy-infisical/config.json
+```
+
+On macOS, credentials are stored in Keychain. On Linux, provide them through the environment:
 
 ```bash
 export DOKPLOY_API_KEY="..."
@@ -90,17 +119,27 @@ export INFISICAL_CLIENT_SECRET="..."
 dokploy-infisical
 ```
 
-The Dokploy token may also be provided as `DOKPLOY_AUTH_TOKEN`.
+`DOKPLOY_AUTH_TOKEN` can be used instead of `DOKPLOY_API_KEY`.
 
-## Requirements
+## Rollback
 
-- a Dokploy API token;
-- an Infisical Machine Identity with Universal Auth access to the target project;
-- an existing Dokploy Vault provider assigned to the projects/environments being migrated;
-- a terminal with TTY support;
-- either Bun 1.3.14+ or Node.js 26.4+ for npm-based installations. Homebrew uses a standalone binary.
+Encrypted snapshots are stored in:
 
-## Usage
+```text
+~/.local/share/dokploy-infisical/migrations/<migration-id>.json.enc
+```
+
+Choose rollback from the main menu or run it directly:
+
+```bash
+dokploy-infisical rollback <migration-id>
+```
+
+A manual rollback restores values but does not redeploy services.
+
+## Reference
+
+### Commands
 
 ```text
 dokploy-infisical
@@ -109,7 +148,7 @@ dokploy-infisical --help
 dokploy-infisical --version
 ```
 
-Keyboard controls:
+### Keyboard controls
 
 | Keys | Action |
 | --- | --- |
@@ -122,31 +161,20 @@ Keyboard controls:
 | `esc` | Go back |
 | `q` | Quit |
 
-## Migration and rollback
+<details>
+<summary>Complete migration sequence</summary>
 
-The forward migration flow is:
-
-1. Verify the Dokploy, Infisical, and Vault provider connections.
-2. Select projects or services.
+1. Check the Dokploy, Infisical, and Vault provider connections.
+2. Select projects or individual services.
 3. Resolve Dokploy project references and build a dry plan.
 4. Review secrets, rewrites, conflicts, and warnings.
 5. Create an encrypted rollback snapshot.
 6. Create Infisical folders and secrets.
 7. Replace Dokploy values with Vault references.
-8. Read both systems back and verify the result.
+8. Read both systems again and verify the result.
 9. Optionally confirm redeploys as a separate action.
 
-Snapshots are stored under:
-
-```text
-~/.local/share/dokploy-infisical/migrations/<migration-id>.json.enc
-```
-
-The recovery password is never stored. Manual rollback does not redeploy services:
-
-```bash
-dokploy-infisical rollback <migration-id>
-```
+</details>
 
 ## Update and uninstall
 
@@ -157,7 +185,7 @@ dokploy-infisical rollback <migration-id>
 | Bun | `bun update -g dokploy-infisical` | `bun remove -g dokploy-infisical` |
 | Homebrew | `brew upgrade sadrozzy/tap/dokploy-infisical` | `brew uninstall dokploy-infisical` |
 
-Uninstalling does not delete configuration, Keychain entries, or encrypted snapshots.
+Uninstalling the app does not remove configuration, Keychain entries, or encrypted snapshots.
 
 ## Development
 
@@ -166,8 +194,6 @@ bun install
 bun run start
 ```
 
-Checks and reproducible screenshots:
-
 ```bash
 bun run check
 bun run test:runtimes
@@ -175,13 +201,9 @@ bun run test:install
 bun run screenshots
 ```
 
-CI tests type safety, the migration engine, the TUI, both runtimes, native compilation, and installation from the packed npm tarball with npm, pnpm, and Bun on macOS and Linux.
+Screenshots are generated from real OpenTUI components without secrets or production data. CI checks types, the migration engine, the TUI, both runtimes, native compilation, and packed npm installation on macOS and Linux.
 
-## Publishing
-
-Pushes and pull requests never publish packages. The release workflow is manual, checks the version, requires the literal confirmation `PUBLISH`, and can be protected with GitHub environment reviewers. It publishes npm through trusted publishing, creates GitHub release assets with SHA-256 checksums, and updates `sadrozzy/homebrew-tap` using a narrowly scoped token.
-
-See [the release checklist](docs/RELEASING.md) before the first release.
+See the [release checklist](docs/RELEASING.md) for publishing instructions.
 
 ## License
 

@@ -1,87 +1,116 @@
-# dokploy-infisical
+<div align="center">
+  <img src="docs/assets/readme-hero.svg" alt="dokploy-infisical — безопасный перенос секретов между Dokploy и Infisical" width="100%">
 
-[![CI](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml/badge.svg)](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/dokploy-infisical.svg)](https://www.npmjs.com/package/dokploy-infisical)
-[![Лицензия: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  <br>
 
-[English](README.md) · **Русский**
+  [![CI](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml/badge.svg)](https://github.com/sadrozzy/dokploy-infisical/actions/workflows/ci.yml)
+  [![npm](https://img.shields.io/npm/v/dokploy-infisical.svg)](https://www.npmjs.com/package/dokploy-infisical)
+  [![Лицензия: MIT](https://img.shields.io/badge/лицензия-MIT-22c55e.svg)](LICENSE)
 
-Терминальный интерфейс для безопасной синхронизации секретов окружения между Dokploy и Infisical. Приложение строит план для проверки, шифрует снимок отката до первой записи, проверяет обе системы после миграции и никогда не выводит значения секретов.
+  [English](README.md) · **Русский**
+</div>
 
-> Проект сообщества, не связанный официально с Dokploy или Infisical.
+## Что это
 
-## TUI
+`dokploy-infisical` — терминальная утилита, которая переносит секреты приложений из Dokploy в Infisical и подключает их обратно через Vault-ссылки.
 
-Скриншоты создаются из настоящих OpenTUI-компонентов командой `bun run screenshots`; секреты и производственные данные не используются.
+Вместо ручного копирования значений между двумя панелями вы выбираете проекты, проверяете готовый план и подтверждаете миграцию. До первого изменения программа создаёт зашифрованный снимок для отката, а после переноса повторно проверяет обе системы.
 
-![Выбор сценария](docs/screenshots/workflows.svg)
+> Это проект сообщества. Он не связан официально с Dokploy или Infisical.
 
-![Выбор проектов и сервисов](docs/screenshots/project-selection.svg)
+### Когда утилита полезна
 
-## Возможности
+- секреты сейчас хранятся прямо в переменных окружения Dokploy;
+- Infisical уже настроен как Vault-провайдер в Dokploy;
+- нужно перенести несколько проектов без ручной работы и риска пропустить значение;
+- важно заранее увидеть изменения и иметь понятный путь назад.
 
-- **Dokploy → Infisical** — перенос исходных значений в `/<project>/_shared` или `/<project>/<service>` и замена значений сервисов на Vault-ссылки.
-- **Infisical → Dokploy** — добавление отсутствующих Vault-ссылок без копирования открытых значений обратно в Dokploy.
-- **Зашифрованный откат** — снимки AES-256-GCM, автоматическое восстановление после ошибки записи и ручной откат из TUI или CLI.
-- **Предварительная проверка** — перед применением видны точные количества секретов и замен, после него обе системы читаются повторно.
-- **Безопасный повторный запуск** — существующие `${{vault.*}}` неизменяемы и никогда не копируются как открытый секрет.
-- **Явный redeploy** — перезапуск подтверждается отдельно после успешной проверки и никогда не запускается автоматически.
+## Как это работает
 
-## Установка
+<p align="center">
+  <img src="docs/assets/migration-flow.svg" alt="Схема миграции: Dokploy, проверка плана, зашифрованный снимок, Infisical и Vault-ссылки" width="100%">
+</p>
 
-При любом способе установки используется одна команда: `dokploy-infisical`.
+Утилита поддерживает два безопасных сценария:
 
-### npm
+- **Dokploy → Infisical** — переносит исходные значения в `/<project>/_shared` или `/<project>/<service>`, затем заменяет их в Dokploy на Vault-ссылки.
+- **Infisical → Dokploy** — добавляет недостающие Vault-ссылки из существующей структуры папок. Открытые значения из Infisical обратно не копируются.
 
-Нужен Node.js 26.4 или новее.
+## Быстрый старт
 
-```bash
-npm install -g dokploy-infisical
-```
+### 1. Установите
 
-### pnpm
-
-Нужен Node.js 26.4 или новее.
-
-```bash
-pnpm add -g dokploy-infisical
-```
-
-### Bun
-
-Нужен Bun 1.3.14 или новее.
-
-```bash
-bun add -g dokploy-infisical
-```
-
-### Homebrew
-
-Пакет Homebrew содержит автономный бинарный файл и не требует Node.js или Bun.
+**Homebrew** — автономный бинарный файл, Node.js и Bun не нужны:
 
 ```bash
 brew install sadrozzy/tap/dokploy-infisical
 ```
 
-Полное имя Formula явно разрешает установку только этого пакета. Пользователю не нужно выполнять `brew trust` или доверять всему tap.
+Или установите из npm registry:
+
+```bash
+npm install -g dokploy-infisical
+```
+
+Для npm и pnpm нужен Node.js 26.4+, для Bun — Bun 1.3.14+.
+
+<details>
+<summary>Другие команды установки</summary>
+
+```bash
+pnpm add -g dokploy-infisical
+# или
+bun add -g dokploy-infisical
+```
+
+</details>
 
 Поддерживаются macOS и Linux на arm64 и x64.
 
-## Быстрый старт
+### 2. Подготовьте доступы
+
+Понадобятся:
+
+- URL и API-токен Dokploy;
+- URL Infisical;
+- Client ID и Client Secret от Infisical Machine Identity с Universal Auth;
+- ID проекта и slug окружения Infisical;
+- имя уже настроенного Vault-провайдера Dokploy.
+
+Vault-провайдер должен быть заранее назначен проектам и окружениям, которые вы собираетесь переносить.
+
+### 3. Запустите
 
 ```bash
 dokploy-infisical
 ```
 
-При первом запуске мастер запросит:
+При первом запуске мастер попросит доступы, проверит соединения и покажет проекты. Дальше: выберите сценарий → отметьте проекты или сервисы → проверьте план → подтвердите перенос.
 
-- URL и API-токен Dokploy;
-- URL Infisical;
-- Client ID и Client Secret для Universal Auth;
-- ID проекта и slug окружения Infisical;
-- имя существующего Vault-провайдера Dokploy.
+![Выбор проектов и сервисов](docs/screenshots/project-selection.svg)
 
-Несекретные настройки сохраняются в `~/.config/dokploy-infisical/config.json`. На macOS учётные данные хранятся в Keychain. На Linux передавайте их через окружение:
+## Что защищает миграцию
+
+| Механизм | Что он даёт |
+| --- | --- |
+| План до записи | Показывает количество секретов, замен, конфликтов и предупреждений до применения |
+| Зашифрованный снимок | Создаётся до первого изменения и шифруется AES-256-GCM |
+| Автоматический откат | Запускается, если запись завершилась ошибкой |
+| Повторная проверка | После миграции обе системы читаются заново |
+| Безопасный повторный запуск | Существующие `${{vault.*}}` не изменяются и не превращаются в открытый текст |
+| Отдельный redeploy | Никогда не запускается автоматически и требует подтверждения |
+
+Программа не выводит значения секретов в терминал. Пароль восстановления не сохраняется.
+
+## Настройки и учётные данные
+
+Несекретные настройки сохраняются в:
+
+```text
+~/.config/dokploy-infisical/config.json
+```
+
+На macOS учётные данные хранятся в Keychain. На Linux передайте их через окружение:
 
 ```bash
 export DOKPLOY_API_KEY="..."
@@ -90,17 +119,27 @@ export INFISICAL_CLIENT_SECRET="..."
 dokploy-infisical
 ```
 
-Токен Dokploy также можно передать как `DOKPLOY_AUTH_TOKEN`.
+Вместо `DOKPLOY_API_KEY` можно использовать `DOKPLOY_AUTH_TOKEN`.
 
-## Требования
+## Откат
 
-- API-токен Dokploy;
-- Machine Identity Infisical с Universal Auth и доступом к целевому проекту;
-- существующий Vault-провайдер Dokploy, назначенный целевым проектам и окружениям;
-- терминал с поддержкой TTY;
-- Bun 1.3.14+ или Node.js 26.4+ для установок из npm registry. Homebrew использует автономный бинарный файл.
+Зашифрованные снимки хранятся в:
 
-## Использование
+```text
+~/.local/share/dokploy-infisical/migrations/<migration-id>.json.enc
+```
+
+Откат можно выбрать в главном меню или запустить напрямую:
+
+```bash
+dokploy-infisical rollback <migration-id>
+```
+
+Ручной откат восстанавливает значения, но не перезапускает сервисы.
+
+## Справочник
+
+### Команды
 
 ```text
 dokploy-infisical
@@ -109,7 +148,7 @@ dokploy-infisical --help
 dokploy-infisical --version
 ```
 
-Управление:
+### Клавиши
 
 | Клавиши | Действие |
 | --- | --- |
@@ -122,31 +161,20 @@ dokploy-infisical --version
 | `esc` | Вернуться назад |
 | `q` | Выйти |
 
-## Миграция и откат
-
-Прямая миграция выполняется так:
+<details>
+<summary>Полная последовательность миграции</summary>
 
 1. Проверяются соединения с Dokploy, Infisical и Vault-провайдером.
-2. Выбираются проекты или отдельные сервисы.
-3. Разрешаются проектные ссылки Dokploy и строится предварительный план.
-4. Проверяются секреты, замены, конфликты и предупреждения.
+2. Вы выбираете проекты или отдельные сервисы.
+3. Утилита разрешает проектные ссылки Dokploy и строит предварительный план.
+4. Вы проверяете секреты, замены, конфликты и предупреждения.
 5. Создаётся зашифрованный снимок отката.
-6. Создаются папки и секреты Infisical.
+6. В Infisical создаются папки и секреты.
 7. Значения Dokploy заменяются на Vault-ссылки.
 8. Обе системы читаются повторно, результат проверяется.
 9. При необходимости redeploy подтверждается отдельным действием.
 
-Снимки хранятся здесь:
-
-```text
-~/.local/share/dokploy-infisical/migrations/<migration-id>.json.enc
-```
-
-Пароль восстановления не сохраняется. Ручной откат не перезапускает сервисы:
-
-```bash
-dokploy-infisical rollback <migration-id>
-```
+</details>
 
 ## Обновление и удаление
 
@@ -166,8 +194,6 @@ bun install
 bun run start
 ```
 
-Проверки и воспроизводимые скриншоты:
-
 ```bash
 bun run check
 bun run test:runtimes
@@ -175,13 +201,9 @@ bun run test:install
 bun run screenshots
 ```
 
-CI проверяет типы, движок миграции, TUI, оба runtime, нативную сборку и установку упакованного npm-архива через npm, pnpm и Bun на macOS и Linux.
+Скриншоты генерируются из настоящих OpenTUI-компонентов без секретов и производственных данных. CI проверяет типы, движок миграции, TUI, оба runtime, нативную сборку и установку упакованного npm-архива на macOS и Linux.
 
-## Публикация
-
-Push и pull request никогда не публикуют пакеты. Релиз запускается вручную, сверяет версию и требует буквального подтверждения `PUBLISH`; дополнительно его можно защитить обязательным одобрением GitHub Environment. Workflow публикует npm через trusted publishing, создаёт GitHub Release с SHA-256 и обновляет `sadrozzy/homebrew-tap` с помощью токена с минимальными правами.
-
-Перед первым релизом выполните [релизный чек-лист](docs/RELEASING.md).
+Инструкции по выпуску находятся в [релизном чек-листе](docs/RELEASING.md).
 
 ## Лицензия
 

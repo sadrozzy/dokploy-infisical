@@ -17,7 +17,7 @@
   "bin": {
     "dokploy-infisical": "./bin/dokploy-infisical"
   },
-  "files": ["bin", "dist", "docs/screenshots", "README.md", "README.ru.md", "LICENSE"],
+  "files": ["bin", "dist", "docs/assets", "docs/screenshots", "README.md", "README.ru.md", "LICENSE"],
   "keywords": ["dokploy", "infisical", "secrets", "migration", "tui", "bun", "cli"],
   "os": ["darwin", "linux"],
   "scripts": {
